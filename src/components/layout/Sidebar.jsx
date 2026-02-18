@@ -1,21 +1,19 @@
 import { NavLink } from "react-router-dom";
-import { 
-  LayoutDashboard, 
-  PlusCircle, 
-  FileText, 
-  Users, 
-  Settings, 
-  LogOut, 
-  CheckSquare, 
-  BarChart2, 
-  Home 
+import {
+  LayoutDashboard,
+  PlusCircle,
+  FileText,
+  Users,
+  CheckSquare,
+  BarChart2,
+  Home,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { cn } from "../../utils/cn";
 import { motion } from "framer-motion";
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
 
   const roleLinks = {
     student: [
@@ -37,63 +35,96 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
 
   const links = roleLinks[user?.role] || [];
 
+  const roleColors = {
+    student: "from-blue-500 to-indigo-600",
+    warden: "from-emerald-500 to-teal-600",
+    admin: "from-purple-500 to-pink-600",
+  };
+  const gradientClass = roleColors[user?.role] || "from-primary-500 to-primary-700";
+
+  const initials = user?.name
+    ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2)
+    : "?";
+
   return (
-    <motion.aside 
+    <motion.aside
       initial={{ x: -250 }}
       animate={{ x: 0 }}
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={cn(
-        "fixed inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 shadow-xl transition-transform duration-300 transform lg:translate-x-0",
+        "fixed inset-y-0 left-0 z-50 w-64 sidebar transition-transform duration-300 transform lg:translate-x-0",
         !isOpen && "-translate-x-full"
       )}
     >
       <div className="flex flex-col h-full">
         {/* Logo */}
-        <div className="h-16 flex items-center px-8 border-b border-gray-100 dark:border-gray-800">
-          <Home className="w-6 h-6 text-primary-600 mr-2" />
-          <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400">
-            HostelFix
-          </span>
+        <div className="h-16 flex items-center px-6 border-b border-gray-100/50 dark:border-gray-800/50">
+          <div className="flex items-center gap-2">
+            <div className={`w-8 h-8 rounded-xl bg-gradient-to-br ${gradientClass} flex items-center justify-center shadow-lg`}>
+              <Home className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400">
+              HostelFix
+            </span>
+          </div>
+        </div>
+
+        {/* Role Badge */}
+        <div className="px-4 pt-4 pb-2">
+          <div className={`text-xs font-semibold uppercase tracking-widest px-3 py-1.5 rounded-lg bg-gradient-to-r ${gradientClass} text-white/90 inline-block`}>
+            {user?.role} Portal
+          </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto">
-          {links.map((link) => (
-            <NavLink
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
+          {links.map((link, index) => (
+            <motion.div
               key={link.path}
-              to={link.path}
-              className={({ isActive }) => cn(
-                "flex items-center px-4 py-3 rounded-xl transition-all duration-200 group text-sm font-medium",
-                isActive 
-                  ? "bg-primary-50 text-primary-600 dark:bg-primary-900/20 dark:text-primary-400 shadow-sm" 
-                  : "text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-200"
-              )}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
             >
-              <link.icon className="w-5 h-5 mr-3" />
-              {link.name}
-            </NavLink>
+              <NavLink
+                to={link.path}
+                onClick={() => window.innerWidth < 1024 && toggleSidebar()}
+                className={({ isActive }) =>
+                  cn(
+                    "flex items-center px-4 py-3 rounded-xl transition-all duration-200 group text-sm font-medium",
+                    isActive
+                      ? `bg-gradient-to-r ${gradientClass} text-white shadow-lg`
+                      : "nav-link-inactive"
+                  )
+                }
+              >
+                {({ isActive }) => (
+                  <>
+                    <link.icon className={cn("w-5 h-5 mr-3 transition-transform group-hover:scale-110", isActive ? "text-white" : "")} />
+                    {link.name}
+                    {isActive && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="ml-auto w-1.5 h-1.5 rounded-full bg-white/70"
+                      />
+                    )}
+                  </>
+                )}
+              </NavLink>
+            </motion.div>
           ))}
         </nav>
 
-        {/* User Profile & Logout */}
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800">
-          <div className="flex items-center p-3 mb-2 rounded-xl bg-gray-50 dark:bg-gray-800/50">
-            <img 
-              src={user?.avatar || `https://ui-avatars.com/api/?name=${user?.name}`} 
-              alt="Profile" 
-              className="w-10 h-10 rounded-full border border-gray-200 dark:border-gray-700"
-            />
+        {/* User Profile */}
+        <div className="p-4 border-t border-gray-100/50 dark:border-gray-800/50">
+          <div className={cn("flex items-center p-3 rounded-xl", user?.role === 'warden' ? 'bg-emerald-50 dark:bg-emerald-900/20' : user?.role === 'admin' ? 'bg-purple-50 dark:bg-purple-900/20' : 'bg-blue-50 dark:bg-blue-900/20')}>
+            <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${gradientClass} flex items-center justify-center text-white text-sm font-bold shadow-md flex-shrink-0`}>
+              {initials}
+            </div>
             <div className="ml-3 overflow-hidden">
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{user?.name}</p>
               <p className="text-xs text-gray-500 dark:text-gray-400 capitalize">{user?.role}</p>
             </div>
           </div>
-          <button 
-            onClick={logout}
-            className="w-full flex items-center justify-center px-4 py-2 text-sm font-medium text-red-600 bg-red-50 hover:bg-red-100 dark:bg-red-900/10 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-          >
-            <LogOut className="w-4 h-4 mr-2" />
-            Logout
-          </button>
         </div>
       </div>
     </motion.aside>

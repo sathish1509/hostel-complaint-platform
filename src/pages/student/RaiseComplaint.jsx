@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
+
 import { Card } from "../../components/ui/Card";
 import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
@@ -17,14 +17,23 @@ const RaiseComplaint = () => {
     const [description, setDescription] = useState("");
     const [category, setCategory] = useState("Electrical");
     const [priority, setPriority] = useState("Medium");
-    const [image, setImage] = useState(null);
+    const [media, setMedia] = useState(null);
+    const [mediaType, setMediaType] = useState(null); // 'image' or 'video'
 
-    const handleImageUpload = (e) => {
+    const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (file) {
+            const fileType = file.type.split('/')[0]; // 'image' or 'video'
+            
+            if (fileType !== 'image' && fileType !== 'video') {
+                alert("Only images and videos are allowed");
+                return;
+            }
+
             const reader = new FileReader();
             reader.onloadend = () => {
-                setImage(reader.result);
+                setMedia(reader.result);
+                setMediaType(fileType);
             };
             reader.readAsDataURL(file);
         }
@@ -39,9 +48,10 @@ const RaiseComplaint = () => {
             description,
             category,
             priority,
-            image, // This would be a URL in real app
+            attachment: media, 
+            attachmentType: mediaType,
             studentName: "John Student", // Mock
-            studentId: "s1",
+            studentId: "s1", // Should come from auth context
             room: "101",
             block: "A"
         };
@@ -117,21 +127,25 @@ const RaiseComplaint = () => {
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Image (Optional)</label>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Upload Attachment (Image or Video)</label>
                         <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl p-6 text-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative">
                             <input 
                                 type="file" 
-                                accept="image/*" 
-                                onChange={handleImageUpload} 
+                                accept="image/*,video/*" 
+                                onChange={handleFileUpload} 
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                             />
-                            {image ? (
-                                <div className="relative inline-block">
-                                    <img src={image} alt="Preview" className="h-32 rounded-lg object-cover" />
+                            {media ? (
+                                <div className="relative inline-block w-full max-w-sm mx-auto">
+                                    {mediaType === 'video' ? (
+                                        <video src={media} controls className="w-full h-48 rounded-lg bg-black object-contain" />
+                                    ) : (
+                                        <img src={media} alt="Preview" className="h-48 rounded-lg object-contain mx-auto" />
+                                    )}
                                     <button 
                                         type="button"
-                                        onClick={(e) => { e.preventDefault(); setImage(null); }}
-                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600"
+                                        onClick={(e) => { e.preventDefault(); setMedia(null); setMediaType(null); }}
+                                        className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 shadow-md hover:bg-red-600 z-10"
                                     >
                                         <X size={14} />
                                     </button>
@@ -140,7 +154,7 @@ const RaiseComplaint = () => {
                                 <div className="flex flex-col items-center text-gray-500">
                                     <Upload size={32} className="mb-2" />
                                     <p className="text-sm">Click to upload or drag and drop</p>
-                                    <p className="text-xs text-gray-400">PNG, JPG up to 5MB</p>
+                                    <p className="text-xs text-gray-400">Images or Videos up to 10MB</p>
                                 </div>
                             )}
                         </div>

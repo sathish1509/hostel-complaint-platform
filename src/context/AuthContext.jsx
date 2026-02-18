@@ -45,10 +45,16 @@ export const AuthProvider = ({ children }) => {
     toast.success("Logged out successfully");
   };
 
+  const updateUser = (updatedUser) => {
+    setUser(updatedUser);
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+  };
+
   const value = {
     user,
     login,
     logout,
+    updateUser,
     isAuthenticated: !!user,
     loading
   };

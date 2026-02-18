@@ -1,100 +1,77 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
+import api from "../utils/api";
 
 const ComplaintContext = createContext();
 
 export const useComplaint = () => useContext(ComplaintContext);
 
-// Mock Initial Data
-const INITIAL_COMPLAINTS = [
-  {
-    id: "C-1001",
-    title: "Leaking Tap in Room 101",
-    description: "The bathroom tap is leaking continuously.",
-    category: "Plumbing",
-    priority: "High",
-    status: "Pending", // Pending, Approved, In Progress, Resolved, Escalated
-    date: "2023-10-25",
-    studentName: "John Student",
-    studentId: "s1",
-    room: "101",
-    block: "A",
-    upvotes: 2,
-    images: [],
-    timeline: [
-        { status: 'Submitted', date: '2023-10-25', note: 'Complaint raised by student' }
-    ]
-  },
-  {
-    id: "C-1002",
-    title: "Broken Fan Regulator",
-    description: "Fan regulator is loose and not working.",
-    category: "Electrical",
-    priority: "Medium",
-    status: "In Progress",
-    date: "2023-10-24",
-    studentName: "Mike Ross",
-    studentId: "s2",
-    room: "102",
-    block: "A",
-    upvotes: 0,
-    images: [],
-    timeline: [
-        { status: 'Submitted', date: '2023-10-24', note: 'Complaint raised' },
-        { status: 'Approved', date: '2023-10-25', note: 'Approved by Warden' },
-        { status: 'In Progress', date: '2023-10-26', note: 'Electrician assigned' }
-    ]
-  }
-];
-
 export const ComplaintProvider = ({ children }) => {
-  const [complaints, setComplaints] = useState(() => {
-    const saved = localStorage.getItem("complaints");
-    return saved ? JSON.parse(saved) : INITIAL_COMPLAINTS;
-  });
+  const [complaints, setComplaints] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchComplaints = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/complaints');
+      setComplaints(response.data);
+    } catch (error) {
+      console.error("Error fetching complaints:", error);
+      toast.error("Failed to load complaints");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem("complaints", JSON.stringify(complaints));
-  }, [complaints]);
+    fetchComplaints();
+  }, []);
 
-  const addComplaint = (complaint) => {
-    const newComplaint = {
-      ...complaint,
-      id: `C-${1000 + complaints.length + 1}`,
-      status: "Pending",
-      date: new Date().toISOString().split('T')[0],
-      upvotes: 0,
-      timeline: [{ status: 'Submitted', date: new Date().toISOString().split('T')[0], note: 'Complaint raised' }]
-    };
-    setComplaints([newComplaint, ...complaints]);
-    toast.success("Complaint raised successfully!");
+  const addComplaint = async (complaintData) => {
+    try {
+      const response = await api.post('/complaints', complaintData);
+      setComplaints(prev => [response.data, ...prev]);
+      toast.success("Complaint raised successfully!");
+      return response.data;
+    } catch (error) {
+      toast.error("Failed to raise complaint");
+      throw error;
+    }
   };
 
-  const updateStatus = (id, newStatus, note = "") => {
-    setComplaints(prev => prev.map(c => {
-      if (c.id === id) {
-        const updatedTimeline = [...c.timeline, { 
-            status: newStatus, 
-            date: new Date().toISOString().split('T')[0], 
-            note 
-        }];
-        return { ...c, status: newStatus, timeline: updatedTimeline };
-      }
-      return c;
-    }));
-    toast.success(`Complaint status updated to ${newStatus}`);
+  const updateStatus = async (id, newStatus, note = "") => {
+    try {
+      const response = await api.patch(`/complaints/${id}/status`, { status: newStatus, note });
+      setComplaints(prev => prev.map(c => c.id === id ? response.data : c));
+      toast.success(`Status updated to ${newStatus}`);
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
   };
 
-  const escalateComplaint = (id) => {
-      updateStatus(id, "Escalated", "Escalated to Admin due to delay");
+  const escalateComplaint = async (id) => {
+    await updateStatus(id, "Escalated", "Escalated to Admin due to delay");
   };
   
-  const upvoteComplaint = (id) => {
-      setComplaints(prev => prev.map(c => c.id === id ? { ...c, upvotes: c.upvotes + 1 } : c));
+  const upvoteComplaint = async (id) => {
+    try {
+      const response = await api.patch(`/complaints/${id}/upvote`);
+      setComplaints(prev => prev.map(c => c.id === id ? response.data : c));
+    } catch (error) {
+      toast.error("Action failed");
+    }
   };
 
   return (
-    <ComplaintContext.Provider value={{ complaints, addComplaint, updateStatus, escalateComplaint, upvoteComplaint }}>
+    <ComplaintContext.Provider value={{ 
+      complaints, 
+      loading, 
+      addComplaint, 
+      updateStatus, 
+      escalateComplaint, 
+      upvoteComplaint,
+      refreshComplaints: fetchComplaints 
+    }}>
       {children}
     </ComplaintContext.Provider>
   );

@@ -1,9 +1,16 @@
+import { useState } from "react";
 import { Card } from "../../components/ui/Card";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useComplaint } from "../../context/ComplaintContext";
+import ComplaintDetailModal from "../../components/complaints/ComplaintDetailModal";
+import { useTheme } from "../../context/ThemeContext";
 
 const AdminDashboard = () => {
     const { complaints } = useComplaint();
+    const { theme } = useTheme();
+    const [selectedComplaint, setSelectedComplaint] = useState(null);
+
+    const escalations = complaints.filter(c => c.status === 'Escalated');
 
     const data = [
         { name: 'Jan', complaints: 40 },
@@ -30,7 +37,7 @@ const AdminDashboard = () => {
                 <Card>
                     <h3 className="text-lg font-bold mb-6">Monthly Complaints Trend</h3>
                     <div className="h-64 w-full">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" key={theme}>
                             <BarChart data={data}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF'}} />
@@ -48,7 +55,7 @@ const AdminDashboard = () => {
                 <Card>
                     <h3 className="text-lg font-bold mb-6">Complaint Status Distribution</h3>
                     <div className="h-64 w-full flex items-center justify-center">
-                        <ResponsiveContainer width="100%" height="100%">
+                        <ResponsiveContainer width="100%" height="100%" key={theme}>
                             <PieChart>
                                 <Pie
                                     data={pieData}
@@ -93,18 +100,62 @@ const AdminDashboard = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                            <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                <td className="px-6 py-4 font-medium">C-1005</td>
-                                <td className="px-6 py-4">WiFi Not Working</td>
-                                <td className="px-6 py-4">B</td>
-                                <td className="px-6 py-4">Oct 26, 2023</td>
-                                <td className="px-6 py-4"><span className="text-red-500 font-semibold">Escalated</span></td>
-                                <td className="px-6 py-4"><button className="text-primary-600 hover:underline">View</button></td>
-                            </tr>
+                            {escalations.length > 0 ? (
+                                escalations.map((c) => (
+                                    <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                        <td className="px-6 py-4 font-medium">{c.id}</td>
+                                        <td className="px-6 py-4">{c.title}</td>
+                                        <td className="px-6 py-4">{c.block}</td>
+                                        <td className="px-6 py-4">{c.createdAt || "Oct 26, 2023"}</td>
+                                        <td className="px-6 py-4"><span className="text-red-500 font-semibold">{c.status}</span></td>
+                                        <td className="px-6 py-4">
+                                            <button 
+                                                onClick={() => setSelectedComplaint(c)}
+                                                className="text-primary-600 hover:underline font-medium"
+                                            >
+                                                View
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
+                                    <td className="px-6 py-4 font-medium">C-1005</td>
+                                    <td className="px-6 py-4">WiFi Not Working</td>
+                                    <td className="px-6 py-4">B</td>
+                                    <td className="px-6 py-4">Oct 26, 2023</td>
+                                    <td className="px-6 py-4"><span className="text-red-500 font-semibold">Escalated</span></td>
+                                    <td className="px-6 py-4">
+                                        <button 
+                                            onClick={() => setSelectedComplaint({
+                                                id: "C-1005",
+                                                title: "WiFi Not Working",
+                                                block: "B",
+                                                room: "204",
+                                                studentName: "John Doe",
+                                                status: "Escalated",
+                                                description: "The WiFi in Block B, Floor 2 has been down for 3 days. Multiple students are unable to complete assignments.",
+                                                category: "Infrastructure",
+                                                createdAt: "Oct 26, 2023"
+                                            })}
+                                            className="text-primary-600 hover:underline font-medium"
+                                        >
+                                            View
+                                        </button>
+                                    </td>
+                                </tr>
+                            )}
                         </tbody>
                     </table>
                 </div>
             </Card>
+
+            {selectedComplaint && (
+                <ComplaintDetailModal 
+                    complaint={selectedComplaint} 
+                    onClose={() => setSelectedComplaint(null)} 
+                />
+            )}
         </div>
     );
 };

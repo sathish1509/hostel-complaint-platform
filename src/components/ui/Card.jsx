@@ -9,8 +9,8 @@ export const Card = ({ children, className, hover = false, noPadding = false }) 
       transition={{ duration: 0.3 }}
       whileHover={hover ? { y: -5, transition: { duration: 0.2 } } : {}}
       className={cn(
-        "bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden",
-        hover && "shadow-xl shadow-primary-500/5 cursor-pointer",
+        "card overflow-hidden",
+        hover && "card-hover cursor-pointer",
         !noPadding && "p-6",
         className
       )}

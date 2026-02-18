@@ -84,11 +84,27 @@ const ComplaintDetailModal = ({ complaint, onClose }) => {
               </p>
             </div>
 
-            {/* Image */}
-            {complaint.image && (
-                <div>
-                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Attachment</h3>
-                     <img src={complaint.image} alt="Complaint Attachment" className="rounded-xl border border-gray-200 dark:border-gray-700 max-h-64 object-cover" />
+            {/* Attachment */}
+            {(complaint.attachment || complaint.image) && (
+                <div className="space-y-2">
+                     <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider">Attachment</h3>
+                     {complaint.attachmentType === 'video' ? (
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden bg-black">
+                             <video 
+                                src={complaint.attachment} 
+                                controls 
+                                className="w-full max-h-[400px] mx-auto"
+                            />
+                        </div>
+                     ) : (
+                        <div className="rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+                            <img 
+                                src={complaint.attachment || complaint.image} 
+                                alt="Complaint Attachment" 
+                                className="w-full max-h-[400px] object-contain bg-gray-50 dark:bg-gray-800" 
+                            />
+                        </div>
+                     )}
                 </div>
             )}
 

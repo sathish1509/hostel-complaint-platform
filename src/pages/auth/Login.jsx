@@ -30,30 +30,30 @@ export const Login = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-800"
+        className="w-full max-w-md glass-panel rounded-3xl p-8 border border-white/20 dark:border-gray-800"
       >
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-primary-600 to-indigo-600 mb-6 shadow-lg shadow-primary-500/30">
             <Building2 className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-gray-900 to-gray-700 dark:from-white dark:to-gray-300">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-gray-300">
             Welcome Back
           </h1>
-          <p className="text-gray-500 dark:text-gray-400 mt-2">Sign in to manage your complaints</p>
+          <p className="text-slate-500 dark:text-gray-400 mt-2">Sign in to manage your complaints</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* Role Tab Switcher */}
-            <div className="flex bg-gray-100 dark:bg-gray-800 p-1.5 rounded-xl mb-6">
+            <div className="flex bg-slate-100 dark:bg-gray-800 p-1.5 rounded-xl mb-6 shadow-inner border border-slate-200/50 dark:border-transparent">
                 {['student', 'warden', 'admin'].map((role) => (
                     <button
                         key={role}
                         type="button"
                         onClick={() => setFormData({ ...formData, role })}
-                        className={`flex-1 py-2 text-sm font-medium rounded-lg capitalize transition-all duration-200 ${
+                        className={`flex-1 py-2 text-sm font-bold rounded-lg capitalize transition-all duration-200 ${
                             formData.role === role 
                             ? 'bg-white dark:bg-gray-700 text-primary-600 dark:text-primary-400 shadow-sm' 
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700'
+                            : 'text-slate-500 dark:text-gray-400 hover:text-slate-700'
                         }`}
                     >
                         {role}
