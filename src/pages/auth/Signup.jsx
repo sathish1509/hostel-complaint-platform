@@ -5,20 +5,36 @@ import { Input } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { User, Mail, Lock, Building, Layers } from "lucide-react";
 import { toast } from "react-hot-toast";
+import { registerUser } from "../../services/authService";
 
 const Signup = () => {
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const [formData, setFormData] = useState({
+        firstName: "",
+        lastName: "",
+        email: "",
+        block: "",
+        roomNo: "",
+        password: "",
+        role: "student"
+    });
     
     const handleSubmit = async (e) => {
         e.preventDefault();
         setIsLoading(true);
-        // Simulate Signup
-        setTimeout(() => {
-            setIsLoading(false);
+        try {
+            await registerUser({
+                ...formData,
+                name: `${formData.firstName} ${formData.lastName}`
+            });
             toast.success("Account created! Please login.");
             navigate("/login");
-        }, 1500);
+        } catch (error) {
+            toast.error(error.message || "Signup failed");
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -42,19 +58,62 @@ const Signup = () => {
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                        <Input icon={User} placeholder="First Name" required />
-                        <Input icon={User} placeholder="Last Name" required />
+                        <Input 
+                            icon={User} 
+                            placeholder="First Name" 
+                            required 
+                            value={formData.firstName}
+                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                        />
+                        <Input 
+                            icon={User} 
+                            placeholder="Last Name" 
+                            required 
+                            value={formData.lastName}
+                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                        />
                     </div>
                     
-                    <Input icon={Mail} type="email" placeholder="Email Address" required />
+                    <Input 
+                        icon={Mail} 
+                        type="email" 
+                        placeholder="Email Address" 
+                        required 
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
                     
                     <div className="grid grid-cols-2 gap-4">
-                        <Input icon={Layers} placeholder="Block (e.g., A)" required />
-                        <Input icon={Building} placeholder="Room No (e.g., 101)" required />
+                        <Input 
+                            icon={Layers} 
+                            placeholder="Block (e.g., A)" 
+                            required 
+                            value={formData.block}
+                            onChange={(e) => setFormData({ ...formData, block: e.target.value })}
+                        />
+                        <Input 
+                            icon={Building} 
+                            placeholder="Room No (e.g., 101)" 
+                            required 
+                            value={formData.roomNo}
+                            onChange={(e) => setFormData({ ...formData, roomNo: e.target.value })}
+                        />
                     </div>
 
-                    <Input icon={Lock} type="password" placeholder="Password" required />
-                    <Input icon={Lock} type="password" placeholder="Confirm Password" required />
+                    <Input 
+                        icon={Lock} 
+                        type="password" 
+                        placeholder="Password" 
+                        required 
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    />
+                    <Input 
+                        icon={Lock} 
+                        type="password" 
+                        placeholder="Confirm Password" 
+                        required 
+                    />
 
                     <div className="pt-4">
                         <Button type="submit" isLoading={isLoading} className="w-full py-3 text-lg">
