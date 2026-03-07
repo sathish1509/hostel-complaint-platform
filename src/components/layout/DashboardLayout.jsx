@@ -20,10 +20,10 @@ const DashboardLayout = () => {
     <div className="page-bg font-sans">
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
-      <main className="lg:ml-64 min-h-screen flex flex-col transition-all duration-300">
+      <main className="lg:ml-72 min-h-screen flex flex-col transition-all duration-300">
         <Navbar toggleSidebar={toggleSidebar} />
 
-        <div className="flex-1 p-6 pt-24 overflow-y-auto">
+        <div className="flex-1 p-8 pt-28 overflow-y-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}

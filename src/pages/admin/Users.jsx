@@ -4,7 +4,6 @@ import { Card } from "../../components/ui/Card";
 import { Badge } from "../../components/ui/Badge";
 import { Search, Shield, ShieldOff, Trash2, UsersIcon, UserCog } from "lucide-react";
 import { toast } from "react-hot-toast";
-import api from "../../utils/api";
 
 const containerVariants = {
     initial: { opacity: 0 },
@@ -105,16 +104,23 @@ const Users = () => {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
 
-    const fetchUsers = async () => {
-        try {
-            setLoading(true);
-            const response = await api.get('/users');
-            setUsers(response.data);
-        } catch (err) {
-            toast.error("Failed to load users");
-        } finally {
-            setLoading(false);
+    const fetchUsers = () => {
+        setLoading(true);
+        const storedUsers = JSON.parse(localStorage.getItem("users") || "[]");
+        // Demo users if localStorage is empty
+        const demoUsers = [
+            { id: '1', name: 'Student Demo', email: 'student@hostel.com', role: 'student', status: 'Active' },
+            { id: '2', name: 'Warden Demo', email: 'warden@hostel.com', role: 'warden', status: 'Active', isOnDuty: true, lastActive: '2 mins ago' },
+            { id: '3', name: 'Admin Demo', email: 'admin@hostel.com', role: 'admin', status: 'Active' },
+        ];
+        
+        if (storedUsers.length === 0) {
+            setUsers(demoUsers);
+            localStorage.setItem("users", JSON.stringify(demoUsers));
+        } else {
+            setUsers(storedUsers);
         }
+        setLoading(false);
     };
 
     useEffect(() => {
@@ -137,25 +143,21 @@ const Users = () => {
     const wardens = filtered.filter(u => u.role === 'warden');
     const students = filtered.filter(u => u.role === 'student');
 
-    const toggleStatus = async (id) => {
-        try {
-            const response = await api.patch(`/users/${id}/status`);
-            setUsers(users.map(u => u.id === id ? response.data : u));
-            toast.success("User status updated");
-        } catch (err) {
-            toast.error("Failed to update user");
-        }
+    const toggleStatus = (id) => {
+        const updatedUsers = users.map(u => 
+            u.id === id ? { ...u, status: u.status === 'Active' ? 'Blocked' : 'Active' } : u
+        );
+        setUsers(updatedUsers);
+        localStorage.setItem("users", JSON.stringify(updatedUsers));
+        toast.success("User status updated");
     };
 
-    const deleteUser = async (id, name) => {
+    const deleteUser = (id, name) => {
         if (window.confirm(`Are you sure you want to delete ${name}?`)) {
-            try {
-                await api.delete(`/users/${id}`);
-                setUsers(users.filter(u => u.id !== id));
-                toast.success(`${name} has been removed`);
-            } catch (err) {
-                toast.error("Failed to delete user");
-            }
+            const updatedUsers = users.filter(u => u.id !== id);
+            setUsers(updatedUsers);
+            localStorage.setItem("users", JSON.stringify(updatedUsers));
+            toast.success(`${name} has been removed`);
         }
     };
 

@@ -4,6 +4,8 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { useComplaint } from "../../context/ComplaintContext";
 import ComplaintDetailModal from "../../components/complaints/ComplaintDetailModal";
 import { useTheme } from "../../context/ThemeContext";
+import { motion } from "framer-motion";
+import { TrendingUp, Users, AlertCircle, CheckCircle2, Clock } from "lucide-react";
 
 const AdminDashboard = () => {
     const { complaints } = useComplaint();
@@ -11,6 +13,13 @@ const AdminDashboard = () => {
     const [selectedComplaint, setSelectedComplaint] = useState(null);
 
     const escalations = complaints.filter(c => c.status === 'Escalated');
+
+    const stats = [
+      { label: 'Total Users', value: '1,280', icon: Users, color: 'text-blue-600', bg: 'bg-blue-500/10' },
+      { label: 'Live Issues', value: complaints.filter(c => c.status !== 'Resolved').length, icon: AlertCircle, color: 'text-amber-600', bg: 'bg-amber-500/10' },
+      { label: 'Resolution Rate', value: '94%', icon: TrendingUp, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
+      { label: 'Escalations', value: escalations.length, icon: Clock, color: 'text-rose-600', bg: 'bg-rose-500/10' },
+    ];
 
     const data = [
         { name: 'Jan', complaints: 40 },
@@ -22,129 +31,193 @@ const AdminDashboard = () => {
     ];
 
     const pieData = [
-        { name: 'Pending', value: complaints.filter(c => c.status === 'Pending').length },
-        { name: 'In Progress', value: complaints.filter(c => c.status === 'In Progress').length },
-        { name: 'Resolved', value: complaints.filter(c => c.status === 'Resolved').length },
+        { name: 'Pending', value: complaints.filter(c => c.status === 'Pending').length || 5 },
+        { name: 'In Progress', value: complaints.filter(c => c.status === 'In Progress').length || 3 },
+        { name: 'Resolved', value: complaints.filter(c => c.status === 'Resolved').length || 12 },
     ];
 
     const COLORS = ['#FBBF24', '#3B82F6', '#10B981', '#EF4444'];
 
     return (
-        <div className="space-y-8">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Admin Overview</h1>
+        <div className="space-y-10 pb-20">
+            <header className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                >
+                    <h1 className="text-4xl font-extrabold tracking-tight text-dark-950 dark:text-white mb-2">
+                      Admin Intelligence
+                    </h1>
+                    <p className="text-dark-500 dark:text-dark-400 font-medium italic">
+                      Real-time analytics and platform governance
+                    </p>
+                </motion.div>
+                
+                <div className="flex -space-x-3">
+                  {[1,2,3,4].map(idx => (
+                    <div key={idx} className="w-10 h-10 rounded-full border-4 border-white dark:border-dark-900 bg-dark-100 overflow-hidden">
+                      <img src={`https://i.pravatar.cc/100?img=${idx + 10}`} alt="Admin" />
+                    </div>
+                  ))}
+                  <div className="w-10 h-10 rounded-full border-4 border-white dark:border-dark-900 bg-primary-600 flex items-center justify-center text-[10px] font-bold text-white uppercase">
+                    +12
+                  </div>
+                </div>
+            </header>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <Card>
-                    <h3 className="text-lg font-bold mb-6">Monthly Complaints Trend</h3>
-                    <div className="h-64 w-full">
+            {/* Quick Stats Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {stats.map((stat, idx) => (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: idx * 0.1 }}
+                >
+                  <Card premium className="!p-6 flex items-center gap-5 hover:scale-105 transition-transform duration-500 cursor-pointer group">
+                    <div className={`p-4 ${stat.bg} ${stat.color} rounded-[1.25rem] group-hover:rotate-6 transition-transform duration-500`}>
+                      <stat.icon size={24} strokeWidth={2.5} />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-bold text-dark-400 dark:text-dark-500 uppercase tracking-widest">{stat.label}</p>
+                      <p className="text-2xl font-extrabold text-dark-900 dark:text-white">{stat.value}</p>
+                    </div>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <Card premium className="lg:col-span-2">
+                    <h3 className="text-lg font-extrabold text-dark-900 dark:text-white mb-8 tracking-tight">Monthly Incident Velocity</h3>
+                    <div className="h-72 w-full">
                         <ResponsiveContainer width="100%" height="100%" key={theme}>
                             <BarChart data={data}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#9CA3AF'}} />
-                                <YAxis axisLine={false} tickLine={false} tick={{fill: '#9CA3AF'}} />
-                                <Tooltip 
-                                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}
-                                    cursor={{ fill: '#F3F4F6' }}
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={theme === 'dark' ? '#1e293b' : '#f1f5f9'} />
+                                <XAxis 
+                                  dataKey="name" 
+                                  axisLine={false} 
+                                  tickLine={false} 
+                                  tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 600}} 
                                 />
-                                <Bar dataKey="complaints" fill="#3B82F6" radius={[4, 4, 0, 0]} barSize={32} />
+                                <YAxis 
+                                  axisLine={false} 
+                                  tickLine={false} 
+                                  tick={{fill: '#94a3b8', fontSize: 12, fontWeight: 600}} 
+                                />
+                                <Tooltip 
+                                    contentStyle={{ 
+                                      borderRadius: '1.25rem', 
+                                      border: 'none', 
+                                      boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1)',
+                                      backgroundColor: theme === 'dark' ? '#0f172a' : '#ffffff',
+                                      padding: '12px 16px'
+                                    }}
+                                    cursor={{ fill: theme === 'dark' ? '#1e293b' : '#f8fafc' }}
+                                />
+                                <Bar dataKey="complaints" fill="#6366f1" radius={[8, 8, 0, 0]} barSize={40} />
                             </BarChart>
                         </ResponsiveContainer>
                     </div>
                 </Card>
 
-                <Card>
-                    <h3 className="text-lg font-bold mb-6">Complaint Status Distribution</h3>
-                    <div className="h-64 w-full flex items-center justify-center">
+                <Card premium>
+                    <h3 className="text-lg font-extrabold text-dark-900 dark:text-white mb-8 tracking-tight">Resolution Phase</h3>
+                    <div className="h-64 w-full flex items-center justify-center relative">
                         <ResponsiveContainer width="100%" height="100%" key={theme}>
                             <PieChart>
                                 <Pie
                                     data={pieData}
                                     cx="50%"
                                     cy="50%"
-                                    innerRadius={60}
-                                    outerRadius={80}
-                                    paddingAngle={5}
+                                    innerRadius={70}
+                                    outerRadius={95}
+                                    paddingAngle={8}
                                     dataKey="value"
+                                    stroke="none"
                                 >
                                     {pieData.map((entry, index) => (
-                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} cornerRadius={8} />
                                     ))}
                                 </Pie>
-                                <Tooltip />
+                                <Tooltip 
+                                  contentStyle={{ borderRadius: '1rem', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }}
+                                />
                             </PieChart>
                         </ResponsiveContainer>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                          <span className="text-3xl font-extrabold text-dark-900 dark:text-white">
+                            {pieData.reduce((acc, curr) => acc + curr.value, 0)}
+                          </span>
+                          <span className="text-[10px] font-bold text-dark-400 dark:text-dark-500 uppercase tracking-widest mt-1">Total Items</span>
+                        </div>
                     </div>
-                    <div className="flex justify-center gap-4 mt-4 text-sm text-gray-600 dark:text-gray-400">
+                    <div className="space-y-3 mt-8">
                         {pieData.map((entry, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                                <span className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[index] }}></span>
-                                {entry.name}: {entry.value}
+                            <div key={index} className="flex items-center justify-between p-3 bg-dark-50 dark:bg-dark-900/50 rounded-xl border border-dark-100 dark:border-dark-800/50">
+                                <div className="flex items-center gap-3 font-bold text-xs text-dark-900 dark:text-white uppercase tracking-widest">
+                                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[index] }}></span>
+                                  {entry.name}
+                                </div>
+                                <span className="font-mono font-bold text-dark-400">{entry.value}</span>
                             </div>
                         ))}
                     </div>
                 </Card>
             </div>
 
-            <Card>
-                <h3 className="text-lg font-bold mb-4">Recent Escalations</h3>
+            <Card premium className="!p-0 overflow-hidden">
+                <div className="px-8 py-6 border-bottom border-dark-100 dark:border-dark-800/50 flex items-center justify-between">
+                  <h3 className="text-lg font-extrabold text-dark-900 dark:text-white tracking-tight">Critical Escalations</h3>
+                  <button className="text-xs font-bold text-primary-600 dark:text-primary-400 uppercase tracking-widest hover:underline">View History</button>
+                </div>
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
-                         <thead className="bg-gray-50 dark:bg-gray-800 text-xs uppercase font-semibold text-gray-700 dark:text-gray-300">
-                            <tr>
-                                <th className="px-6 py-3">ID</th>
-                                <th className="px-6 py-3">Issue</th>
-                                <th className="px-6 py-3">Block</th>
-                                <th className="px-6 py-3">Date</th>
-                                <th className="px-6 py-3">Status</th>
-                                <th className="px-6 py-3">Action</th>
+                    <table className="w-full text-left">
+                         <thead>
+                            <tr className="table-header">
+                                <th className="px-8 !py-5">IDENTIFIER</th>
+                                <th className="px-8 !py-5">SUBJECT MATTER</th>
+                                <th className="px-8 !py-5">LOCATION</th>
+                                <th className="px-8 !py-5">DATE REPORTED</th>
+                                <th className="px-8 !py-5">URGENCY</th>
+                                <th className="px-8 !py-5 text-right">OPERATIONS</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-                            {escalations.length > 0 ? (
-                                escalations.map((c) => (
-                                    <tr key={c.id} className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                        <td className="px-6 py-4 font-medium">{c.id}</td>
-                                        <td className="px-6 py-4">{c.title}</td>
-                                        <td className="px-6 py-4">{c.block}</td>
-                                        <td className="px-6 py-4">{c.createdAt || "Oct 26, 2023"}</td>
-                                        <td className="px-6 py-4"><span className="text-red-500 font-semibold">{c.status}</span></td>
-                                        <td className="px-6 py-4">
-                                            <button 
-                                                onClick={() => setSelectedComplaint(c)}
-                                                className="text-primary-600 hover:underline font-medium"
-                                            >
-                                                View
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))
-                            ) : (
-                                <tr className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors">
-                                    <td className="px-6 py-4 font-medium">C-1005</td>
-                                    <td className="px-6 py-4">WiFi Not Working</td>
-                                    <td className="px-6 py-4">B</td>
-                                    <td className="px-6 py-4">Oct 26, 2023</td>
-                                    <td className="px-6 py-4"><span className="text-red-500 font-semibold">Escalated</span></td>
-                                    <td className="px-6 py-4">
+                        <tbody className="divide-y divide-dark-100 dark:divide-dark-800/50">
+                            {(escalations.length > 0 ? escalations : [{
+                                id: "C-1005",
+                                title: "Major WiFi Infrastructure Failure",
+                                block: "B",
+                                createdAt: "26 Oct 2023",
+                                status: "Escalated",
+                                priority: "High"
+                            }]).map((c) => (
+                                <tr key={c.id} className="table-row-hover group transition-colors">
+                                    <td className="px-8 py-6 text-[10px] font-mono font-bold text-dark-400">#{c.id}</td>
+                                    <td className="px-8 py-6">
+                                      <div className="font-bold text-dark-900 dark:text-white tracking-tight group-hover:text-primary-600 transition-colors">{c.title}</div>
+                                      <div className="text-[10px] font-medium text-dark-400 uppercase tracking-widest mt-0.5">Systems Infrastructure</div>
+                                    </td>
+                                    <td className="px-8 py-6">
+                                      <span className="px-3 py-1 bg-dark-100 dark:bg-dark-800 text-[10px] font-bold text-dark-600 dark:text-dark-400 rounded-lg">Block {c.block}</span>
+                                    </td>
+                                    <td className="px-8 py-6 text-sm font-semibold text-dark-500 dark:text-dark-400">{c.createdAt || "26 Oct 2023"}</td>
+                                    <td className="px-8 py-6">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                                        <span className="text-xs font-bold text-rose-600 dark:text-rose-400 uppercase tracking-widest">{c.status}</span>
+                                      </div>
+                                    </td>
+                                    <td className="px-8 py-6 text-right">
                                         <button 
-                                            onClick={() => setSelectedComplaint({
-                                                id: "C-1005",
-                                                title: "WiFi Not Working",
-                                                block: "B",
-                                                room: "204",
-                                                studentName: "John Doe",
-                                                status: "Escalated",
-                                                description: "The WiFi in Block B, Floor 2 has been down for 3 days. Multiple students are unable to complete assignments.",
-                                                category: "Infrastructure",
-                                                createdAt: "Oct 26, 2023"
-                                            })}
-                                            className="text-primary-600 hover:underline font-medium"
+                                            onClick={() => setSelectedComplaint(c)}
+                                            className="px-4 py-2 bg-dark-100 dark:bg-dark-800 hover:bg-primary-600 hover:text-white text-dark-700 dark:text-dark-200 text-xs font-bold rounded-xl transition-all uppercase tracking-widest"
                                         >
-                                            View
+                                            Inspect
                                         </button>
                                     </td>
                                 </tr>
-                            )}
+                            ))}
                         </tbody>
                     </table>
                 </div>

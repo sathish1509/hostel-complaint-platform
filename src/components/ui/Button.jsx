@@ -13,26 +13,27 @@ export const Button = ({
   disabled
 }) => {
   const variants = {
-    primary: "bg-primary-600 text-white hover:bg-primary-700 shadow-lg shadow-primary-500/30",
-    secondary: "bg-gray-100 text-gray-900 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-100",
-    outline: "border-2 border-primary-600 text-primary-600 hover:bg-primary-50 dark:border-primary-400 dark:text-primary-400",
-    ghost: "text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800",
-    danger: "bg-red-600 text-white hover:bg-red-700 shadow-lg shadow-red-500/30",
+    primary: "bg-gradient-to-br from-primary-600 to-indigo-600 text-white shadow-xl shadow-primary-500/25 hover:shadow-primary-600/40 hover:-translate-y-0.5",
+    secondary: "bg-white dark:bg-dark-800 text-dark-800 dark:text-dark-100 border border-dark-200 dark:border-dark-700 shadow-sm hover:bg-dark-50 dark:hover:bg-dark-700 hover:-translate-y-0.5 transition-all duration-300",
+    outline: "border-2 border-primary-600 text-primary-600 hover:bg-primary-50 dark:border-primary-400 dark:text-primary-400 hover:-translate-y-0.5 transition-all duration-300",
+    ghost: "text-dark-600 hover:bg-dark-100 dark:text-dark-400 dark:hover:bg-dark-800 transition-all duration-300",
+    danger: "bg-gradient-to-br from-rose-500 to-red-600 text-white shadow-xl shadow-rose-500/25 hover:shadow-rose-600/40 hover:-translate-y-0.5 transition-all duration-300",
   };
 
   const sizes = {
-    sm: "px-3 py-1.5 text-sm",
-    md: "px-5 py-2.5 text-base",
-    lg: "px-6 py-3 text-lg",
-    icon: "p-2",
+    sm: "px-4 py-2 text-[10px] font-bold uppercase tracking-wider",
+    md: "px-6 py-3 text-xs font-bold uppercase tracking-widest",
+    lg: "px-8 py-4 text-sm font-bold uppercase tracking-[0.15em]",
+    icon: "p-3",
   };
 
   return (
     <motion.button
-      whileTap={{ scale: 0.98 }}
+      whileTap={{ scale: 0.96 }}
+      whileHover={{ y: -2 }}
       type={type}
       className={cn(
-        "relative flex items-center justify-center rounded-xl font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed",
+        "relative flex items-center justify-center rounded-2xl font-bold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed",
         variants[variant],
         sizes[size],
         className
@@ -41,7 +42,7 @@ export const Button = ({
       disabled={disabled || isLoading}
     >
       {isLoading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-      {children}
+      <span className="relative z-10">{children}</span>
     </motion.button>
   );
 };

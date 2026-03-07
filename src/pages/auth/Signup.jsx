@@ -38,26 +38,52 @@ const Signup = () => {
     };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950 p-4 relative overflow-hidden">
-             {/* Background Decoration */}
+        <div className="min-h-screen flex items-center justify-center bg-dark-50 dark:bg-dark-950 p-6 relative overflow-hidden">
+             {/* Advanced Background Decoration */}
             <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-20%] right-[-10%] w-[50%] h-[50%] bg-blue-500/10 rounded-full blur-[120px]" />
-                <div className="absolute bottom-[-20%] left-[-10%] w-[50%] h-[50%] bg-purple-500/10 rounded-full blur-[120px]" />
+                <motion.div 
+                  animate={{ 
+                    scale: [1, 1.2, 1],
+                    x: [0, -50, 0],
+                    y: [0, 100, 0]
+                  }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                  className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-blue-500/10 rounded-full blur-[140px]" 
+                />
+                <motion.div 
+                   animate={{ 
+                    scale: [1, 1.3, 1],
+                    x: [0, 80, 0],
+                    y: [0, -60, 0]
+                  }}
+                  transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+                  className="absolute bottom-[-20%] left-[-10%] w-[60%] h-[60%] bg-purple-500/10 rounded-full blur-[140px]" 
+                />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full bg-[radial-gradient(circle_at_center,rgba(99,102,241,0.03)_0,transparent_70%)]" />
             </div>
 
             <motion.div 
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.4 }}
-                className="w-full max-w-lg bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl rounded-3xl shadow-2xl p-8 border border-white/20 dark:border-gray-800"
+                initial={{ opacity: 0, scale: 0.9, y: 40 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{ type: "spring", stiffness: 100, damping: 20, delay: 0.1 }}
+                className="w-full max-w-xl glass-panel rounded-[3rem] shadow-premium p-10 lg:p-14 border border-white/40 dark:border-white/5 relative z-10"
             >
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">Create Account</h1>
-                    <p className="text-gray-500 dark:text-gray-400">Join the hostel community</p>
+                <div className="text-center mb-10">
+                    <motion.div 
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.3 }}
+                      className="inline-flex items-center justify-center w-20 h-20 rounded-[2rem] bg-gradient-to-tr from-primary-600 to-indigo-600 mb-8 shadow-2xl shadow-primary-500/40 relative"
+                    >
+                      <div className="absolute inset-0 bg-white/20 rounded-[2rem] animate-pulse" />
+                      <Building className="w-10 h-10 text-white relative z-10" />
+                    </motion.div>
+                    <h1 className="text-4xl font-extrabold tracking-tight text-dark-950 dark:text-white mb-3">Join the Community</h1>
+                    <p className="text-dark-500 dark:text-dark-400 font-medium">Create your credentials to get started</p>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <Input 
                             icon={User} 
                             placeholder="First Name" 
@@ -83,7 +109,7 @@ const Signup = () => {
                         onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                     />
                     
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                         <Input 
                             icon={Layers} 
                             placeholder="Block (e.g., A)" 
@@ -100,30 +126,32 @@ const Signup = () => {
                         />
                     </div>
 
-                    <Input 
-                        icon={Lock} 
-                        type="password" 
-                        placeholder="Password" 
-                        required 
-                        value={formData.password}
-                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    />
-                    <Input 
-                        icon={Lock} 
-                        type="password" 
-                        placeholder="Confirm Password" 
-                        required 
-                    />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <Input 
+                            icon={Lock} 
+                            type="password" 
+                            placeholder="Password" 
+                            required 
+                            value={formData.password}
+                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        />
+                        <Input 
+                            icon={Lock} 
+                            type="password" 
+                            placeholder="Confirm Password" 
+                            required 
+                        />
+                    </div>
 
-                    <div className="pt-4">
-                        <Button type="submit" isLoading={isLoading} className="w-full py-3 text-lg">
-                            Sign Up
+                    <div className="pt-6">
+                        <Button type="submit" isLoading={isLoading} className="w-full py-4 text-sm font-bold tracking-widest uppercase">
+                            Create Account
                         </Button>
                     </div>
 
-                    <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-6">
+                    <p className="text-center text-sm text-dark-500 dark:text-dark-400 mt-8 font-medium">
                         Already have an account? 
-                        <Link to="/login" className="text-primary-600 hover:text-primary-700 font-semibold ml-1">
+                        <Link to="/login" className="text-primary-600 dark:text-primary-400 hover:underline font-bold ml-1">
                             Sign In
                         </Link>
                     </p>
